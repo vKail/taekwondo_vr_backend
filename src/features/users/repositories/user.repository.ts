@@ -3,6 +3,7 @@ import { PrismaService } from '../../../core/database/prisma.service';
 import { UserEntity } from '../entities/user.entity';
 import { UserMapper } from '../mappers/user.mapper';
 import { CreateUserData } from '../interfaces/create-user-data.interface';
+import { UpdateUserData } from '../interfaces/update-user-data.interface';
 
 @Injectable()
 export class UserRepository {
@@ -20,6 +21,14 @@ export class UserRepository {
 
   async createUser(data: CreateUserData): Promise<UserEntity> {
     const record = await this.prisma.user.create({ data });
+    return UserMapper.toDomain(record);
+  }
+
+  async updateUser(id: number, data: UpdateUserData): Promise<UserEntity> {
+    const record = await this.prisma.user.update({
+      where: { id },
+      data,
+    });
     return UserMapper.toDomain(record);
   }
 }
