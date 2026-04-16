@@ -7,6 +7,8 @@ import { ApiResponseInterceptor } from './core/interceptors/api-response.interce
 import { GlobalExceptionFilter } from './core/filters/global-exception.filter';
 import { UsersModule } from './features/users/users.module';
 import { AuthModule } from './features/auth/auth.module';
+import { SessionsModule } from './features/sessions/sessions.module';
+import { HistoryModule } from './features/history/history.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { AuthModule } from './features/auth/auth.module';
     SecurityModule,
     UsersModule,
     AuthModule,
+    SessionsModule,
+    HistoryModule,
   ],
   providers: [
     {
