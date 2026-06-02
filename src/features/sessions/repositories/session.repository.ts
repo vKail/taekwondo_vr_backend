@@ -1,76 +1,74 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service';
-import { Session, SessionDetail, SessionStatus } from '@prisma/client';
+import { GameSession, SessionRecord } from '@prisma/client';
 import { CreateSessionData } from '../interfaces/create-session-data.interface';
-import { SessionDetailData } from '../interfaces/add-session-details-data.interface';
 
 @Injectable()
 export class SessionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateSessionData): Promise<Session> {
-    return this.prisma.session.create({
-      data: { userId: data.userId, score: data.score ?? 0 },
+  async create(data: CreateSessionData): Promise<GameSession> {
+    return this.prisma.gameSession.create({
+      data: { 
+        userId: data.userId, 
+        score: data.score ?? 0,
+        startedAt: new Date(),
+      },
     });
   }
 
-  async findById(id: number): Promise<Session | null> {
-    return this.prisma.session.findUnique({ where: { id } });
+  async findById(id: number): Promise<GameSession | null> {
+    return this.prisma.gameSession.findUnique({ where: { id } });
   }
 
   async findByUserIdPaginated(
     userId: number,
     page: number,
     limit: number,
-  ): Promise<{ sessions: Session[]; total: number }> {
+  ): Promise<{ sessions: GameSession[]; total: number }> {
     const [sessions, total] = await Promise.all([
-      this.prisma.session.findMany({
+      this.prisma.gameSession.findMany({
         where: { userId },
         orderBy: { startedAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.session.count({ where: { userId } }),
+      this.prisma.gameSession.count({ where: { userId } }),
     ]);
     return { sessions, total };
   }
 
-  async complete(id: number, score?: number): Promise<Session> {
-    return this.prisma.session.update({
+  async complete(id: number, score?: number): Promise<GameSession> {
+    return this.prisma.gameSession.update({
       where: { id },
       data: {
-        status: SessionStatus.COMPLETED,
         endedAt: new Date(),
-        score: score ?? undefined,
+        ...(score !== undefined ? { score } : {}),
       },
     });
   }
 
   async addDetails(
-    sessionId: number,
-    details: SessionDetailData[],
-  ): Promise<SessionDetail[]> {
+    gameSessionId: number,
+    details: any[],
+  ): Promise<SessionRecord[]> {
     return this.prisma.$transaction(
       details.map((d) =>
-        this.prisma.sessionDetail.create({
+        this.prisma.sessionRecord.create({
           data: {
-            sessionId,
-            movementId: d.movementId,
-            movementName: d.movementName,
-            executionData: (d.executionData as any) ?? undefined,
-            feedback: (d.feedback as any) ?? undefined,
+            gameSessionId,
+            referenceMovementId: d.referenceMovementId,
+            executionData: d.executionData,
             accuracy: d.accuracy,
-            order: d.order,
           },
         }),
       ),
     );
   }
 
-  async getDetails(sessionId: number): Promise<SessionDetail[]> {
-    return this.prisma.sessionDetail.findMany({
-      where: { sessionId },
-      orderBy: { order: 'asc' },
+  async getDetails(gameSessionId: number): Promise<SessionRecord[]> {
+    return this.prisma.sessionRecord.findMany({
+      where: { gameSessionId },
     });
   }
 }
