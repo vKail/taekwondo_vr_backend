@@ -18,6 +18,7 @@ model User {
   updatedAt DateTime @updatedAt
   
   gameSessions GameSession[]
+  sessions     Session[]
 }
 
 model ReferenceMovement {
@@ -49,4 +50,40 @@ model SessionRecord {
   accuracy        Float
   
   gameSession     GameSession @relation(fields: [gameSessionId], references: [id])
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+}
+
+model Session {
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  score       Float         @default(0)
+  status      SessionStatus @default(ACTIVE)
+  startedAt   DateTime      @default(now())
+  endedAt     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  @@index([userId])
+  user        User          @relation(fields: [userId], references: [id])
+  details     SessionDetail[]
+}
+
+model SessionDetail {
+  id              Int      @id @default(autoincrement())
+  sessionId       Int
+  movementId     Int?
+  movementName   String
+  executionData  Json?
+  feedback       Json?
+  accuracy       Float?
+  order          Int
+  createdAt      DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([sessionId])
+  session        Session   @relation(fields: [sessionId], references: [id])
 }

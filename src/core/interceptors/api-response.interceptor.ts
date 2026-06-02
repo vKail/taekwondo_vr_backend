@@ -22,7 +22,7 @@ export class ApiResponseInterceptor<T> implements NestInterceptor<
     _context: ExecutionContext,
     next: CallHandler,
   ): Observable<ApiResponse<T>> {
-    const ctx = context.switchToHttp();
+    const ctx = _context.switchToHttp();
     const response = ctx.getResponse();
     const status = response.statusCode;
 
