@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { CreateReferenceMovementDto } from '../dto/create-reference-movement.dto';
 import { EvaluateAttemptDto } from '../dto/evaluate-attempt.dto';
 
 @Injectable()
 export class EvaluationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async createReferenceMovement(dto: CreateReferenceMovementDto) {
     return this.prisma.referenceMovement.create({
@@ -33,8 +37,12 @@ export class EvaluationService {
     };
 
     let score = 0;
+    let feedback = 'Evaluación completada';
+    let detailedMetrics = null;
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/evaluate', {
+      const pythonServiceUrl = this.configService.get<string>('PYTHON_SERVICE_URL', 'http://127.0.0.1:8000');
+      const response = await fetch(`${pythonServiceUrl}/evaluate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -49,6 +57,12 @@ export class EvaluationService {
       if (typeof score !== 'number') {
          score = parseFloat(data.score) || 0;
       }
+      if (data.feedback) {
+        feedback = data.feedback;
+      }
+      if (data.detailed_metrics) {
+        detailedMetrics = data.detailed_metrics;
+      }
     } catch (error) {
       throw new HttpException(
         'Service Unavailable: Python evaluation engine failed',
@@ -62,12 +76,15 @@ export class EvaluationService {
         referenceMovementId: dto.referenceMovementId,
         executionData: dto.executionData,
         accuracy: score,
+        feedback: feedback,
+        detailedMetrics: detailedMetrics,
       },
     });
 
     return {
       accuracy: score,
-      feedback: 'Evaluación completada',
+      feedback: feedback,
+      detailedMetrics: detailedMetrics,
     };
   }
 }

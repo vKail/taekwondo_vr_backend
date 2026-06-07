@@ -48,6 +48,8 @@ model SessionRecord {
   referenceMovementId Int
   executionData       Json
   accuracy            Float
+  feedback            String?
+  detailedMetrics     Json?
 
   gameSession       GameSession       @relation(fields: [gameSessionId], references: [id])
   referenceMovement ReferenceMovement @relation(fields: [referenceMovementId], references: [id])
