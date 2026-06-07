@@ -38,7 +38,7 @@ export class EvaluationService {
 
     let score = 0;
     let feedback = 'Evaluación completada';
-    let detailedMetrics = null;
+    let detailedMetrics: any = undefined;
 
     try {
       const pythonServiceUrl = this.configService.get<string>('PYTHON_SERVICE_URL', 'http://127.0.0.1:8000');
