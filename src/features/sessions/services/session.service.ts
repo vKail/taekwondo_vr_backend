@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { SessionRepository } from '../repositories/session.repository';
 import { SessionEntity } from '../entities/session.entity';
 import { SessionDetailEntity } from '../entities/session-detail.entity';
@@ -31,18 +27,14 @@ export class SessionService {
   ): Promise<SessionDetailEntity[]> {
     const session = await this.sessionRepository.findById(sessionId);
     if (!session) throw new NotFoundException('Session not found');
-    if (session.userId !== userId)
-      throw new ForbiddenException('Not authorized');
+    if (session.userId !== userId) throw new ForbiddenException('Not authorized');
 
     const details = await this.sessionRepository.addDetails(
       sessionId,
       dto.details.map((d) => ({
-        movementId: d.movementId,
-        movementName: d.movementName,
-        executionData: d.executionData ?? null,
-        feedback: d.feedback ?? null,
-        accuracy: d.accuracy ?? null,
-        order: d.order,
+        referenceMovementId: d.referenceMovementId,
+        executionData: d.executionData,
+        accuracy: d.accuracy,
       })),
     );
     return SessionDetailMapper.toEntities(details);
@@ -55,13 +47,9 @@ export class SessionService {
   ): Promise<SessionEntity> {
     const session = await this.sessionRepository.findById(sessionId);
     if (!session) throw new NotFoundException('Session not found');
-    if (session.userId !== userId)
-      throw new ForbiddenException('Not authorized');
+    if (session.userId !== userId) throw new ForbiddenException('Not authorized');
 
-    const completed = await this.sessionRepository.complete(
-      sessionId,
-      dto.score,
-    );
+    const completed = await this.sessionRepository.complete(sessionId, dto.score);
     return SessionMapper.toEntity(completed);
   }
 
@@ -71,8 +59,7 @@ export class SessionService {
   ): Promise<{ session: SessionEntity; details: SessionDetailEntity[] }> {
     const session = await this.sessionRepository.findById(sessionId);
     if (!session) throw new NotFoundException('Session not found');
-    if (session.userId !== userId)
-      throw new ForbiddenException('Not authorized');
+    if (session.userId !== userId) throw new ForbiddenException('Not authorized');
 
     const details = await this.sessionRepository.getDetails(sessionId);
     return {
@@ -86,13 +73,9 @@ export class SessionService {
     page: number,
     limit: number,
   ): Promise<{ sessions: SessionEntity[]; total: number }> {
-    const result = await this.sessionRepository.findByUserIdPaginated(
-      userId,
-      page,
-      limit,
-    );
+    const result = await this.sessionRepository.findByUserIdPaginated(userId, page, limit);
     return {
-      sessions: result.sessions.map(SessionMapper.toEntity),
+      sessions: result.sessions.map((s) => SessionMapper.toEntity(s)),
       total: result.total,
     };
   }

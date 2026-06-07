@@ -9,6 +9,7 @@ import { UsersModule } from './features/users/users.module';
 import { AuthModule } from './features/auth/auth.module';
 import { SessionsModule } from './features/sessions/sessions.module';
 import { HistoryModule } from './features/history/history.module';
+import { EvaluationModule } from './features/evaluation/evaluation.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { HistoryModule } from './features/history/history.module';
     AuthModule,
     SessionsModule,
     HistoryModule,
+    EvaluationModule,
   ],
   providers: [
     {
