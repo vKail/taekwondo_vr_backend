@@ -5,6 +5,9 @@ interface UserRecord {
   email: string;
   username: string;
   password: string;
+  name: string | null;
+  lastName: string | null;
+  birthdate: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +19,9 @@ export class UserMapper {
       email: record.email,
       username: record.username,
       password: record.password,
+      name: record.name,
+      lastName: record.lastName,
+      birthdate: record.birthdate,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     });

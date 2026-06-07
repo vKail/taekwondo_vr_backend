@@ -7,43 +7,50 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
   username  String
   password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  name      String?
+  lastName  String?
+  birthdate DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   gameSessions GameSession[]
 }
 
 model ReferenceMovement {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  techniqueName String   @unique
+  description   String?
+  jointsData    Json
+  createdAt     DateTime @default(now())
+
+  sessionRecords SessionRecord[]
 }
 
 model GameSession {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  score       Float
-  startedAt   DateTime
-  endedAt     DateTime
-  
-  records     SessionRecord[]
-  
-  user        User     @relation(fields: [userId], references: [id])
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  score     Float
+  startedAt DateTime
+  endedAt   DateTime?
+
+  records SessionRecord[]
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model SessionRecord {
-  id              Int      @id @default(autoincrement())
-  gameSessionId   Int
-  movementName    String
-  executionData   Json
-  accuracy        Float
-  
-  gameSession     GameSession @relation(fields: [gameSessionId], references: [id])
+  id                  Int   @id @default(autoincrement())
+  gameSessionId       Int
+  referenceMovementId Int
+  executionData       Json
+  accuracy            Float
+  feedback            String?
+  detailedMetrics     Json?
+
+  gameSession       GameSession       @relation(fields: [gameSessionId], references: [id])
+  referenceMovement ReferenceMovement @relation(fields: [referenceMovementId], references: [id])
 }
