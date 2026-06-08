@@ -66,9 +66,17 @@ export class SessionRepository {
     );
   }
 
-  async getDetails(gameSessionId: number): Promise<SessionRecord[]> {
+  async getDetails(gameSessionId: number): Promise<Partial<SessionRecord>[]> {
     return this.prisma.sessionRecord.findMany({
       where: { gameSessionId },
+      select: {
+        id: true,
+        gameSessionId: true,
+        referenceMovementId: true,
+        accuracy: true,
+        feedback: true,
+        detailedMetrics: true,
+      },
     });
   }
 }
