@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { EvaluationService } from '../services/evaluation.service';
 import { CreateReferenceMovementDto } from '../dto/create-reference-movement.dto';
@@ -22,7 +22,7 @@ export class EvaluationController {
   @Post('evaluate')
   @ApiOperation({ summary: 'Evaluate user VR attempt against reference movement' })
   @ApiResponse({ status: 201, description: 'Evaluation completed and record saved' })
-  async evaluate(@Body() dto: EvaluateAttemptDto) {
-    return this.evaluationService.evaluateMovement(dto);
+  async evaluate(@Body() dto: EvaluateAttemptDto, @Request() req) {
+    return this.evaluationService.evaluateMovement(dto, req.user.sub);
   }
 }

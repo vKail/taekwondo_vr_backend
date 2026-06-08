@@ -21,7 +21,7 @@ export class EvaluationService {
     });
   }
 
-  async evaluateMovement(dto: EvaluateAttemptDto) {
+  async evaluateMovement(dto: EvaluateAttemptDto, userId: number) {
     const reference = await this.prisma.referenceMovement.findUnique({
       where: { id: dto.referenceMovementId },
     });
@@ -70,9 +70,28 @@ export class EvaluationService {
       );
     }
 
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    let activeSession = await this.prisma.gameSession.findFirst({
+      where: {
+        userId: userId,
+        startedAt: { gte: oneDayAgo }
+      },
+      orderBy: { startedAt: 'desc' },
+    });
+
+    if (!activeSession) {
+      activeSession = await this.prisma.gameSession.create({
+        data: {
+          userId: userId,
+          startedAt: new Date(),
+          score: 0,
+        },
+      });
+    }
+
     const record = await this.prisma.sessionRecord.create({
       data: {
-        gameSessionId: dto.gameSessionId,
+        gameSessionId: activeSession.id,
         referenceMovementId: dto.referenceMovementId,
         executionData: dto.executionData,
         accuracy: score,

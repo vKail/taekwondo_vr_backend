@@ -5,11 +5,6 @@ export class EvaluateAttemptDto {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
-  gameSessionId: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
   referenceMovementId: number;
 
   @ApiProperty()
