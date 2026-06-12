@@ -23,6 +23,9 @@ export class EvaluationController {
   @ApiOperation({ summary: 'Evaluate user VR attempt against reference movement' })
   @ApiResponse({ status: 201, description: 'Evaluation completed and record saved' })
   async evaluate(@Body() dto: EvaluateAttemptDto, @Request() req) {
+    if (dto.techniqueName) {
+      return this.evaluationService.evaluateMovementByName(dto, req.user.sub);
+    }
     return this.evaluationService.evaluateMovement(dto, req.user.sub);
   }
 }

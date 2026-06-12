@@ -1,11 +1,16 @@
-import { IsNumber, IsNotEmpty, IsObject } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsNotEmpty, IsObject, IsString, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class EvaluateAttemptDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
-  referenceMovementId: number;
+  referenceMovementId?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  techniqueName?: string;
 
   @ApiProperty()
   @IsObject()

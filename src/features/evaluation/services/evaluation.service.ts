@@ -23,7 +23,7 @@ export class EvaluationService {
 
   async evaluateMovement(dto: EvaluateAttemptDto, userId: number) {
     const reference = await this.prisma.referenceMovement.findUnique({
-      where: { id: dto.referenceMovementId },
+      where: { id: dto.referenceMovementId as number },
     });
 
     if (!reference) {
@@ -92,7 +92,97 @@ export class EvaluationService {
     const record = await this.prisma.sessionRecord.create({
       data: {
         gameSessionId: activeSession.id,
-        referenceMovementId: dto.referenceMovementId,
+        referenceMovementId: reference.id,
+        executionData: dto.executionData,
+        accuracy: score,
+        feedback: feedback,
+        detailedMetrics: detailedMetrics,
+      },
+    });
+
+    return {
+      accuracy: score,
+      feedback: feedback,
+      detailedMetrics: detailedMetrics,
+    };
+  }
+
+  async evaluateMovementByName(dto: EvaluateAttemptDto, userId: number) {
+    if (!dto.techniqueName) {
+      throw new HttpException('Technique name is required', HttpStatus.BAD_REQUEST);
+    }
+
+    const reference = await this.prisma.referenceMovement.findFirst({
+      where: { techniqueName: dto.techniqueName },
+    });
+
+    if (!reference) {
+      throw new NotFoundException(`Reference movement with name ${dto.techniqueName} not found`);
+    }
+
+    const payload = {
+      user_data: dto.executionData,
+      master_data: reference.jointsData,
+      movement_type: reference.techniqueName,
+    };
+
+    let score = 0;
+    let feedback = 'Evaluación completada';
+    let detailedMetrics: any = undefined;
+
+    try {
+      const pythonServiceUrl = this.configService.get<string>('PYTHON_SERVICE_URL', 'http://127.0.0.1:8000');
+      const response = await fetch(`${pythonServiceUrl}/evaluate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Python service responded with status: ${response.status}`);
+      }
+
+      const data = await response.json() as any;
+      score = data.score;
+      if (typeof score !== 'number') {
+         score = parseFloat(data.score) || 0;
+      }
+      if (data.feedback) {
+        feedback = data.feedback;
+      }
+      if (data.detailed_metrics) {
+        detailedMetrics = data.detailed_metrics;
+      }
+    } catch (error) {
+      throw new HttpException(
+        'Service Unavailable: Python evaluation engine failed',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    let activeSession = await this.prisma.gameSession.findFirst({
+      where: {
+        userId: userId,
+        startedAt: { gte: oneDayAgo }
+      },
+      orderBy: { startedAt: 'desc' },
+    });
+
+    if (!activeSession) {
+      activeSession = await this.prisma.gameSession.create({
+        data: {
+          userId: userId,
+          startedAt: new Date(),
+          score: 0,
+        },
+      });
+    }
+
+    const record = await this.prisma.sessionRecord.create({
+      data: {
+        gameSessionId: activeSession.id,
+        referenceMovementId: reference.id,
         executionData: dto.executionData,
         accuracy: score,
         feedback: feedback,
