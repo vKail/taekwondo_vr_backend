@@ -7,7 +7,6 @@ export class SessionDetailMapper {
       id: record.id,
       gameSessionId: record.gameSessionId,
       referenceMovementId: record.referenceMovementId,
-      executionData: record.executionData,
       accuracy: record.accuracy,
       movementName: record.referenceMovement?.techniqueName,
       feedback: record.feedback,
