@@ -100,6 +100,21 @@ export class EvaluationService {
       },
     });
 
+    const sessionRecords = await this.prisma.sessionRecord.findMany({
+      where: { gameSessionId: activeSession.id },
+      select: { accuracy: true },
+    });
+
+    if (sessionRecords.length > 0) {
+      const totalAccuracy = sessionRecords.reduce((acc, curr) => acc + curr.accuracy, 0);
+      const averageScore = totalAccuracy / sessionRecords.length;
+
+      await this.prisma.gameSession.update({
+        where: { id: activeSession.id },
+        data: { score: averageScore },
+      });
+    }
+
     return {
       accuracy: score,
       feedback: feedback,
@@ -189,6 +204,21 @@ export class EvaluationService {
         detailedMetrics: detailedMetrics,
       },
     });
+
+    const sessionRecords = await this.prisma.sessionRecord.findMany({
+      where: { gameSessionId: activeSession.id },
+      select: { accuracy: true },
+    });
+
+    if (sessionRecords.length > 0) {
+      const totalAccuracy = sessionRecords.reduce((acc, curr) => acc + curr.accuracy, 0);
+      const averageScore = totalAccuracy / sessionRecords.length;
+
+      await this.prisma.gameSession.update({
+        where: { id: activeSession.id },
+        data: { score: averageScore },
+      });
+    }
 
     return {
       accuracy: score,
