@@ -4,6 +4,7 @@ export class SessionEntity {
   readonly score: number;
   readonly startedAt: Date;
   readonly endedAt: Date | null;
+  readonly movementName?: string;
 
   constructor(props: SessionEntityProps) {
     this.id = props.id;
@@ -11,6 +12,7 @@ export class SessionEntity {
     this.score = props.score;
     this.startedAt = props.startedAt;
     this.endedAt = props.endedAt ?? null;
+    this.movementName = props.movementName;
   }
 }
 
@@ -20,4 +22,5 @@ interface SessionEntityProps {
   score: number;
   startedAt: Date;
   endedAt?: Date | null;
+  movementName?: string;
 }

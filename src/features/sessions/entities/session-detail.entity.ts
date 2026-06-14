@@ -4,6 +4,9 @@ export class SessionDetailEntity {
   readonly referenceMovementId: number;
   readonly executionData: any;
   readonly accuracy: number;
+  readonly movementName?: string;
+  readonly feedback?: string;
+  readonly detailedMetrics?: any;
 
   constructor(props: SessionDetailEntityProps) {
     this.id = props.id;
@@ -11,6 +14,9 @@ export class SessionDetailEntity {
     this.referenceMovementId = props.referenceMovementId;
     this.executionData = props.executionData;
     this.accuracy = props.accuracy;
+    this.movementName = props.movementName;
+    this.feedback = props.feedback;
+    this.detailedMetrics = props.detailedMetrics;
   }
 }
 
@@ -20,4 +26,7 @@ interface SessionDetailEntityProps {
   referenceMovementId: number;
   executionData: any;
   accuracy: number;
+  movementName?: string;
+  feedback?: string;
+  detailedMetrics?: any;
 }
