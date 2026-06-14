@@ -18,7 +18,19 @@ export class SessionRepository {
   }
 
   async findById(id: number): Promise<GameSession | null> {
-    return this.prisma.gameSession.findUnique({ where: { id } });
+    return this.prisma.gameSession.findUnique({ 
+      where: { id },
+      include: {
+        records: {
+          take: 1,
+          include: {
+            referenceMovement: {
+              select: { techniqueName: true }
+            }
+          }
+        }
+      }
+    });
   }
 
   async findByUserIdPaginated(
@@ -32,6 +44,16 @@ export class SessionRepository {
         orderBy: { startedAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
+        include: {
+          records: {
+            take: 1,
+            include: {
+              referenceMovement: {
+                select: { techniqueName: true }
+              }
+            }
+          }
+        }
       }),
       this.prisma.gameSession.count({ where: { userId } }),
     ]);
@@ -66,17 +88,14 @@ export class SessionRepository {
     );
   }
 
-  async getDetails(gameSessionId: number): Promise<Partial<SessionRecord>[]> {
+  async getDetails(gameSessionId: number): Promise<any[]> {
     return this.prisma.sessionRecord.findMany({
       where: { gameSessionId },
-      select: {
-        id: true,
-        gameSessionId: true,
-        referenceMovementId: true,
-        accuracy: true,
-        feedback: true,
-        detailedMetrics: true,
-      },
+      include: {
+        referenceMovement: {
+          select: { techniqueName: true }
+        }
+      }
     });
   }
 }

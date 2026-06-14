@@ -3,16 +3,18 @@ export class SessionDetailEntity {
   readonly gameSessionId: number;
   readonly referenceMovementId: number;
   readonly accuracy: number;
-  readonly feedback: string | null;
-  readonly detailedMetrics: any | null;
+  readonly movementName?: string;
+  readonly feedback?: string;
+  readonly detailedMetrics?: any;
 
   constructor(props: SessionDetailEntityProps) {
     this.id = props.id;
     this.gameSessionId = props.gameSessionId;
     this.referenceMovementId = props.referenceMovementId;
     this.accuracy = props.accuracy;
-    this.feedback = props.feedback || null;
-    this.detailedMetrics = props.detailedMetrics || null;
+    this.movementName = props.movementName;
+    this.feedback = props.feedback;
+    this.detailedMetrics = props.detailedMetrics;
   }
 }
 
@@ -21,6 +23,7 @@ interface SessionDetailEntityProps {
   gameSessionId: number;
   referenceMovementId: number;
   accuracy: number;
-  feedback?: string | null;
-  detailedMetrics?: any | null;
+  movementName?: string;
+  feedback?: string;
+  detailedMetrics?: any;
 }
